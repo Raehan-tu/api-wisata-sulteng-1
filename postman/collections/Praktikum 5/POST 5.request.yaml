@@ -1,0 +1,13 @@
+$kind: http-request
+url: http://localhost:3000/destinations
+method: POST
+headers:
+  x-api-key: sulteng-web-b84d1e06
+body:
+  type: json
+  content: '{"name": "Air Terjun Wera", "category": "alam", "regionId": 5}'
+auth:
+  type: bearer
+  credentials:
+    token: "{{editor}}"
+order: 8000

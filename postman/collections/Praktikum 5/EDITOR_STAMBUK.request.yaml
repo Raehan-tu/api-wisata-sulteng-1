@@ -1,0 +1,13 @@
+$kind: http-request
+url: "{{local_url}}/login"
+method: POST
+headers:
+  x-api-key: sulteng-web-b84d1e06
+body:
+  type: json
+  content: '{"username": "F5512510011", "password": "F5512510001"}'
+auth:
+  type: bearer
+  credentials:
+    token: ""
+order: 17057

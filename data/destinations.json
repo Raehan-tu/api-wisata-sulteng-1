@@ -1,0 +1,38 @@
+[
+  {
+    "id": 1,
+    "name": "Danau Poso",
+    "category": "danau",
+    "regionId": 2
+  },
+  {
+    "id": 2,
+    "name": "Pantai Tanjung Karang",
+    "category": "pantai",
+    "regionId": 3
+  },
+  {
+    "id": 3,
+    "name": "Kepulauan Togean",
+    "category": "bahari",
+    "regionId": 4
+  },
+  {
+    "id": 4,
+    "name": "Kamnel",
+    "category": "alam",
+    "regionId": 1
+  },
+  {
+    "id": 5,
+    "name": "Pulau Kadidiri",
+    "category": "bahari",
+    "regionId": 4
+  },
+  {
+    "id": 6,
+    "name": "Pulau Kamnel",
+    "category": "alam",
+    "regionId": 4
+  }
+]

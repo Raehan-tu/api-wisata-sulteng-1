@@ -1,0 +1,21 @@
+$kind: graphql-request
+url: "{{local_url}}/graphql"
+query: |
+  mutation UpdateDestination {
+      updateDestination(id: "4") {
+          id
+          name
+          category
+      }
+  }
+variables: ""
+headers:
+  x-api-key: "{{api_key}}"
+settings: {}
+auth:
+  type: bearer
+  credentials:
+    token: "{{json_web_token_1bvr}}"
+schema:
+  source: auto
+order: 25000

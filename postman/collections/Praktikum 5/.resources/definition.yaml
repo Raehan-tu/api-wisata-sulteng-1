@@ -1,0 +1,33 @@
+$kind: collection
+variables:
+  - key: local_url
+    value: ""
+    disabled: false
+  - key: api_key
+    value: ""
+    disabled: false
+  - key: apk_wisata
+    value: ""
+    disabled: false
+  - key: admin
+    secret: true
+    disabled: false
+  - key: editor
+    secret: true
+    disabled: false
+  - key: viewer
+    secret: true
+    disabled: false
+  - key: editor_stambuk
+    secret: true
+    disabled: false
+  - key: ""
+    value: ""
+    disabled: false
+auth:
+  - id: a81912c7-e17c-40a1-b8c9-b8b2ac228ee0
+    type: apikey
+    name: API Key
+    credentials:
+      key: x-api-key
+      value: sulteng-web-b84d1e06

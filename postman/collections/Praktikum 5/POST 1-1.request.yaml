@@ -1,0 +1,22 @@
+$kind: graphql-request
+name: POST 1
+url: "{{local_url}}/graphql"
+query: |
+  query Destinations {
+      destinations {
+          id
+          name
+          category
+      }
+  }
+variables: ""
+headers:
+  x-api-key: sulteng-web-b84d1e06
+settings: {}
+auth:
+  type: bearer
+  credentials:
+    token: ""
+schema:
+  source: auto
+order: 12000

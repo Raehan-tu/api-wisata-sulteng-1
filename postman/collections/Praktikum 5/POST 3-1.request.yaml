@@ -1,0 +1,21 @@
+$kind: graphql-request
+name: POST 3
+url: "{{local_url}}/graphql"
+query: |
+  mutation CreateDestination {
+      createDestination(name: "Pulau Kadidiri", category: "bahari", regionId: "4") {
+          id
+          name
+      }
+  }
+variables: ""
+headers:
+  x-api-key: sulteng-web-b84d1e06
+settings: {}
+auth:
+  type: bearer
+  credentials:
+    token: "{{editor}}"
+schema:
+  source: auto
+order: 14000

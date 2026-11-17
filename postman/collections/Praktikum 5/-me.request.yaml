@@ -1,0 +1,11 @@
+$kind: http-request
+name: /me
+url: "{{local_url}}/me"
+method: GET
+headers:
+  x-api-key: "{{api_key}}"
+auth:
+  type: bearer
+  credentials:
+    token: "{{json_web_token_15hq}}"
+order: 22000

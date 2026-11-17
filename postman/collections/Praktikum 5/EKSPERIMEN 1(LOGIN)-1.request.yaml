@@ -1,0 +1,14 @@
+$kind: http-request
+name: EKSPERIMEN 1(LOGIN)
+url: http://localhost:3000/login
+method: POST
+headers:
+  x-api-key: sulteng-web-b84d1e06
+body:
+  type: json
+  content: '{"username": "Raehan", "password": "Raehanhamdani@1"}'
+auth:
+  type: bearer
+  credentials:
+    token: ""
+order: 17000

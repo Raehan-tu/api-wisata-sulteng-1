@@ -1,0 +1,14 @@
+$kind: http-request
+name: EKSPERIMEN 1 POST
+url: "{{local_url}}/destinations"
+method: POST
+headers:
+  x-api-key: sulteng-web-b84d1e06
+body:
+  type: json
+  content: ""
+auth:
+  type: bearer
+  credentials:
+    token: "{{viewer}}"
+order: 19000

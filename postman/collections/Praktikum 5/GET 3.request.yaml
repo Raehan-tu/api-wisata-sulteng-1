@@ -1,0 +1,9 @@
+$kind: http-request
+url: http://localhost:3000/destinations
+method: GET
+auth:
+  type: apikey
+  credentials:
+    key: x-api-key
+    value: sulteng-web-b84d1e06
+order: 3000
