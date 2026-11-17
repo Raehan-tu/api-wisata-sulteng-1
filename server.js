@@ -18,8 +18,8 @@ const TOKEN_SECRET = process.env.TOKEN_SECRET;
 const MASA_TOKEN = 3600;
 
 if (!TOKEN_SECRET) {
- console.error('TOKEN_SECRET belum diatur. Jalankan: node --env-file=.env server.js');
- process.exit(1);
+    console.error('TOKEN_SECRET belum diatur. Jalankan: node --env-file=.env server.js');
+    process.exit(1);
 }
 
 
@@ -208,6 +208,37 @@ async function buatDestinasi(input) {
 // -----------------------------------------------------------------------------
 // HANDLER ENDPOINT (Kode 3.8, Kode 3.10, Kode 3.11)
 // -----------------------------------------------------------------------------
+
+// ---------- versi ----------
+async function bentukKeluar(versi, item) {
+    if (versi === 'v2') {
+        return item;
+    }
+    const regions = await bacaRegions();
+    const region = regions.find((r) => r.id === item.regionId);
+    return {
+        id: item.id,
+        name: item.name,
+        region: region ? region.name : null,
+        category: item.category
+    };
+}
+async function bentukMasuk(versi, input) {
+    if (versi === 'v2' || input === null || typeof input !== 'object') {
+        return input;
+    }
+    const regions = await bacaRegions();
+    const region = regions.find((r) => r.name === input.region);
+    if (!region) {
+        throw buatError(400, 'region wajib diisi dengan nama region yang tersedia');
+    }
+    return {
+        name: input.name,
+        category: input.category,
+        regionId: region.id
+    };
+}
+
 
 // GET /destinations (Dukungan query filter ?category=...)
 async function daftarDestinasi(req, res, url) {
