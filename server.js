@@ -22,7 +22,6 @@ if (!TOKEN_SECRET) {
     process.exit(1);
 }
 
-
 // Eksperimen 3: Penyimpanan percobaan login gagal (in-memory variable)
 // username -> { count: number, lockedUntil: number }
 const batasPercobaanLogin = new Map();
@@ -54,6 +53,7 @@ async function bacaData() {
 async function simpanData(data) {
     await fs.writeFile(DATA_FILE, JSON.stringify(data, null, 2));
 }
+
 async function bacaRegions() {
     const isi = await fs.readFile(REGION_FILE, 'utf8');
     return JSON.parse(isi);
@@ -195,6 +195,7 @@ async function periksaDestinasi(input) {
         regionId: regionId
     };
 }
+
 async function buatDestinasi(input) {
     const bersih = await periksaDestinasi(input);
     const data = await bacaData();
@@ -223,6 +224,7 @@ async function bentukKeluar(versi, item) {
         category: item.category
     };
 }
+
 async function bentukMasuk(versi, input) {
     if (versi === 'v2' || input === null || typeof input !== 'object') {
         return input;
@@ -239,47 +241,50 @@ async function bentukMasuk(versi, input) {
     };
 }
 
-
 // GET /destinations (Dukungan query filter ?category=...)
-async function daftarDestinasi(req, res, url) {
+async function daftarDestinasi(req, res, url, versi) {
     let data = await bacaData();
     const kategori = url.searchParams.get('category');
     if (kategori) {
         data = data.filter((item) => item.category === kategori);
     }
-    kirimJSON(res, 200, data);
+    const hasil = [];
+    for (const item of data) {
+        hasil.push(await bentukKeluar(versi, item));
+    }
+    kirimJSON(res, 200, hasil);
 }
 
 // GET /destinations/:id
-async function detailDestinasi(req, res, id) {
+async function detailDestinasi(req, res, id, versi) {
     const data = await bacaData();
     const item = data.find((d) => d.id === id);
     if (!item) {
         return kirimError(res, 404, `Destinasi dengan id ${id} tidak ditemukan`);
     }
-    kirimJSON(res, 200, item);
+    kirimJSON(res, 200, await bentukKeluar(versi, item));
 }
 
 // POST /destinations
-async function tambahDestinasi(req, res) {
-    const input = await bacaBody(req);
+async function tambahDestinasi(req, res, versi) {
+    const input = await bentukMasuk(versi, await bacaBody(req));
     const item = await buatDestinasi(input);
-    res.setHeader('Location', `/destinations/${item.id}`);
-    kirimJSON(res, 201, item);
+    res.setHeader('Location', `/${versi}/destinations/${item.id}`);
+    kirimJSON(res, 201, await bentukKeluar(versi, item));
 }
 
 // PUT /destinations/:id
-async function ubahDestinasi(req, res, id) {
-    const input = await bacaBody(req);
+async function ubahDestinasi(req, res, id, versi) {
+    const body = await bacaBody(req);
     const data = await bacaData();
     const index = data.findIndex((d) => d.id === id);
     if (index === -1) {
         return kirimError(res, 404, `Destinasi dengan id ${id} tidak ditemukan`);
     }
-    const bersih = await periksaDestinasi(input);
+    const bersih = await periksaDestinasi(await bentukMasuk(versi, body));
     data[index] = { id: id, ...bersih };
     await simpanData(data);
-    kirimJSON(res, 200, data[index]);
+    kirimJSON(res, 200, await bentukKeluar(versi, data[index]));
 }
 
 // DELETE /destinations/:id
@@ -295,6 +300,8 @@ async function hapusDestinasi(req, res, id) {
     res.writeHead(204);
     res.end();
 }
+
+// GET /regions & GET /regions/:id
 async function tanganiRegions(req, res, segmen) {
     if (req.method !== 'GET') {
         res.setHeader('Allow', 'GET');
@@ -558,37 +565,45 @@ async function router(req, res) {
         return tanganiGraphQL(req, res);
     }
 
-    if (segmen[0] === 'regions' && segmen.length <= 2) {
-        return tanganiRegions(req, res, segmen);
+    // Alamat REST wajib diawali versi: /v1/... atau /v2/...
+    const versi = segmen[0];
+    if (versi !== 'v1' && versi !== 'v2') {
+        return kirimError(res, 404, 'Alamat harus diawali /v1 atau /v2');
     }
 
-    if (segmen[0] !== 'destinations' || segmen.length > 2) {
+    const alamat = segmen.slice(1);
+
+    if (versi === 'v2' && alamat[0] === 'regions' && alamat.length <= 2) {
+        return tanganiRegions(req, res, alamat);
+    }
+
+    if (alamat[0] !== 'destinations' || alamat.length > 2) {
         return kirimError(res, 404, 'Endpoint tidak ditemukan');
     }
 
-    // Endpoint koleksi: /destinations
-    if (segmen.length === 1) {
-        if (req.method === 'GET') return daftarDestinasi(req, res, url);
+    // Endpoint koleksi: /v1/destinations dan /v2/destinations
+    if (alamat.length === 1) {
+        if (req.method === 'GET') return daftarDestinasi(req, res, url, versi);
         // Eksperimen 1: POST menolak viewer, hanya menerima admin dan editor
         if (req.method === 'POST') {
             wajibRole(bacaPengguna(req), ['admin', 'editor']);
-            return tambahDestinasi(req, res);
+            return tambahDestinasi(req, res, versi);
         }
         res.setHeader('Allow', 'GET, POST');
         return kirimError(res, 405, `Method ${req.method} tidak didukung pada endpoint ini`);
     }
 
-    // Endpoint item: /destinations/:id
-    const id = Number(segmen[1]);
+    // Endpoint item: /v1/destinations/:id dan /v2/destinations/:id
+    const id = Number(alamat[1]);
     if (!Number.isInteger(id) || id < 1) {
         return kirimError(res, 400, 'id harus berupa bilangan bulat positif');
     }
 
-    if (req.method === 'GET') return detailDestinasi(req, res, id);
+    if (req.method === 'GET') return detailDestinasi(req, res, id, versi);
     // Eksperimen 1: PUT menolak viewer, hanya menerima admin dan editor
     if (req.method === 'PUT') {
         wajibRole(bacaPengguna(req), ['admin', 'editor']);
-        return ubahDestinasi(req, res, id);
+        return ubahDestinasi(req, res, id, versi);
     }
     // DELETE hanya boleh untuk admin
     if (req.method === 'DELETE') {
