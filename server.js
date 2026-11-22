@@ -249,8 +249,9 @@ async function daftarDestinasi(req, res, url, versi) {
     if (kategori) {
         data = data.filter((item) => item.category === kategori);
     }
+
     if (versi === 'v2') {
-        const regionIdParam = url.searchParams.get('regionId');
+    const regionIdParam = url.searchParams.get('regionId');
         if (regionIdParam !== null && regionIdParam !== '') {
             const regionId = Number(regionIdParam);
             data = data.filter((item) => item.regionId === regionId);
