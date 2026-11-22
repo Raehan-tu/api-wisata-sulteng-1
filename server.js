@@ -257,7 +257,6 @@ async function daftarDestinasi(req, res, url, versi) {
             data = data.filter((item) => item.regionId === regionId);
         }
     }
-
     const hasil = [];
     for (const item of data) {
         hasil.push(await bentukKeluar(versi, item));
@@ -575,13 +574,31 @@ async function router(req, res) {
         return tanganiGraphQL(req, res);
     }
 
-    // Alamat REST wajib diawali versi: /v1/... atau /v2/...
-    const versi = segmen[0];
-    if (versi !== 'v1' && versi !== 'v2') {
-        return kirimError(res, 404, 'Alamat harus diawali /v1 atau /v2');
-    }
+    let versi;
+    let alamat;
 
-    const alamat = segmen.slice(1);
+    if (segmen[0] === 'v1' || segmen[0] === 'v2') {
+        // Cara 1: URI versioning (/v1/... atau /v2/...)
+        versi = segmen[0];
+        alamat = segmen.slice(1);
+    } else {
+        // Cara 2: Header versioning (x-api-version: 1 atau 2)
+        const headerVersi = String(req.headers['x-api-version'] || '').trim().toLowerCase();
+
+        if (headerVersi === '1' || headerVersi === 'v1') {
+            versi = 'v1';
+            alamat = segmen;
+        } else if (headerVersi === '2' || headerVersi === 'v2') {
+            versi = 'v2';
+            alamat = segmen;
+        } else {
+            return kirimError(
+                res,
+                400,
+                'Versi API tidak ditemukan atau tidak valid. Sebutkan versi melalui awalan URL (/v1/... atau /v2/...) atau melalui header x-api-version bernilai 1 atau 2.'
+            );
+        }
+    }
 
     if (versi === 'v1') {
         res.setHeader('Sunset', new Date(V1_BERAKHIR).toUTCString());
