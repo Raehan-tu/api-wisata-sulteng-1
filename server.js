@@ -416,7 +416,8 @@ const schema = buildSchema(`
     }
     type Weather {
         temperature: Float
-        windSpeed: Float
+        windSpeed: Float @deprecated(reason: "Gunakan field windSpeedKmh")
+        windSpeedKmh: Float
         time: String
     }
     type Query {
@@ -453,6 +454,7 @@ async function ambilCuaca(region) {
     return {
         temperature: hasil.current.temperature_2m,
         windSpeed: hasil.current.wind_speed_10m,
+        windSpeedKmh: hasil.current.wind_speed_10m,
         time: hasil.current.time
     };
 }
