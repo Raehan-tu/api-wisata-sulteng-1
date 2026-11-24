@@ -5,7 +5,11 @@ info:
   description: >-
     API destinasi wisata Sulawesi Tengah. Seluruh request wajib menyertakan
     API key. Menambah dan menghapus data memerlukan token dari endpoint /login.
-    Disusun oleh Raehan Hamdani (F5512510011).
+    Disusun oleh Kelompok 1
+    Faiq Muhammad (F5512510001),
+    Raehan Hamdani (F5512510011),
+    Septiyanti Suci Ramandani (F5512510028),
+    Adraka Tristan Wistara (F5512520036).
 servers:
   - url: http://localhost:3000
     description: Server praktikum
