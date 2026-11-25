@@ -560,6 +560,21 @@ async function router(req, res) {
     const url = new URL(req.url, 'http://localhost');
     const segmen = url.pathname.split('/').filter(Boolean);
 
+    // === [TAMBAHAN EKSPERIMEN 3: ENDPOINT DOKUMENTASI OPENAPI] ===
+    if (url.pathname === '/openapi.yaml') {
+        if (req.method !== 'GET') {
+            res.setHeader('Allow', 'GET');
+            return kirimError(res, 405, 'Endpoint /openapi.yaml hanya menerima method GET');
+        }
+        const isi = await fs.readFile(path.join(__dirname, 'openapi.yaml'), 'utf8');
+        res.writeHead(200, {
+            'Content-Type': 'text/yaml',
+            'Content-Length': Buffer.byteLength(isi)
+        });
+        return res.end(isi);
+    }
+    // ==============================================================
+
     const aplikasi = await periksaApiKey(req);
     console.log(` aplikasi: ${aplikasi.client}`);
 
