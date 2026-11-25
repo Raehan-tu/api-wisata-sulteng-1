@@ -16,6 +16,9 @@ servers:
 tags:
   - name: Login
   - name: Destinations
+  # === [TAMBAHAN EKSPERIMEN 1] ===
+  - name: Regions
+  # ===============================
 security:
   - ApiKeyAuth: []
 
@@ -115,6 +118,33 @@ paths:
           $ref: '#/components/responses/TidakDikenali'
         '404':
           $ref: '#/components/responses/TidakDitemukan'
+    # === [TAMBAHAN EKSPERIMEN 1: PUT /v2/destinations/{id}] ===
+    put:
+      tags: [Destinations]
+      summary: Memperbarui data destinasi
+      security:
+        - ApiKeyAuth: []
+          BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DestinationInput'
+      responses:
+        '200':
+          description: Destinasi berhasil diperbarui
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Destination'
+        '400':
+          $ref: '#/components/responses/TidakValid'
+        '401':
+          $ref: '#/components/responses/TidakDikenali'
+        '404':
+          $ref: '#/components/responses/TidakDitemukan'
+    # ==========================================================
     delete:
       tags: [Destinations]
       summary: Menghapus destinasi (hanya admin)
@@ -130,6 +160,48 @@ paths:
           $ref: '#/components/responses/TidakBerhak'
         '404':
           $ref: '#/components/responses/TidakDitemukan'
+
+  # === [TAMBAHAN EKSPERIMEN 1: ENDPOINT REGIONS] ===
+  /v2/regions:
+    get:
+      tags: [Regions]
+      summary: Membaca daftar daerah
+      responses:
+        '200':
+          description: Daftar daerah di Sulawesi Tengah
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Region'
+        '401':
+          $ref: '#/components/responses/TidakDikenali'
+
+  /v2/regions/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        description: Nomor id daerah
+        schema:
+          type: integer
+          example: 1
+    get:
+      tags: [Regions]
+      summary: Membaca satu daerah
+      responses:
+        '200':
+          description: Data daerah
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Region'
+        '401':
+          $ref: '#/components/responses/TidakDikenali'
+        '404':
+          $ref: '#/components/responses/TidakDitemukan'
+  # =================================================
 
   /v1/destinations:
     get:
@@ -183,6 +255,17 @@ components:
         regionId:
           type: integer
           example: 5
+    # === [TAMBAHAN EKSPERIMEN 1: SCHEMA REGION] ===
+    Region:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        name:
+          type: string
+          example: Kota Palu
+    # ==============================================
     LoginRequest:
       type: object
       required: [username, password]
