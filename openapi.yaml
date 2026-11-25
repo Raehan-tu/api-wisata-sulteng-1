@@ -16,9 +16,7 @@ servers:
 tags:
   - name: Login
   - name: Destinations
-  # === [TAMBAHAN EKSPERIMEN 1] ===
   - name: Regions
-  # ===============================
 security:
   - ApiKeyAuth: []
 
@@ -118,7 +116,6 @@ paths:
           $ref: '#/components/responses/TidakDikenali'
         '404':
           $ref: '#/components/responses/TidakDitemukan'
-    # === [TAMBAHAN EKSPERIMEN 1: PUT /v2/destinations/{id}] ===
     put:
       tags: [Destinations]
       summary: Memperbarui data destinasi
@@ -144,7 +141,6 @@ paths:
           $ref: '#/components/responses/TidakDikenali'
         '404':
           $ref: '#/components/responses/TidakDitemukan'
-    # ==========================================================
     delete:
       tags: [Destinations]
       summary: Menghapus destinasi (hanya admin)
@@ -161,7 +157,6 @@ paths:
         '404':
           $ref: '#/components/responses/TidakDitemukan'
 
-  # === [TAMBAHAN EKSPERIMEN 1: ENDPOINT REGIONS] ===
   /v2/regions:
     get:
       tags: [Regions]
@@ -201,19 +196,158 @@ paths:
           $ref: '#/components/responses/TidakDikenali'
         '404':
           $ref: '#/components/responses/TidakDitemukan'
-  # =================================================
 
+  # === [TAMBAHAN EKSPERIMEN 2: LENGKAPI ENDPOINT V1] ===
   /v1/destinations:
     get:
       tags: [Destinations]
       summary: Membaca daftar destinasi (versi lama)
       description: Dilayani sampai 30 Juni 2027. Gunakan /v2/destinations.
       deprecated: true
+      parameters:
+        - name: category
+          in: query
+          required: false
+          description: Menyaring destinasi berdasarkan kategori
+          schema:
+            type: string
+            example: pantai
       responses:
         '200':
           description: Daftar destinasi dengan field region berisi nama daerah
+          headers:
+            Sunset:
+              description: Tanggal penghentian layanan versi v1
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/DestinationV1'
         '401':
           $ref: '#/components/responses/TidakDikenali'
+    post:
+      tags: [Destinations]
+      summary: Menambah destinasi baru (versi lama)
+      description: Dilayani sampai 30 Juni 2027. Gunakan /v2/destinations.
+      deprecated: true
+      security:
+        - ApiKeyAuth: []
+          BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DestinationInputV1'
+      responses:
+        '201':
+          description: Destinasi berhasil ditambahkan
+          headers:
+            Location:
+              description: Alamat destinasi yang baru dibuat
+              schema:
+                type: string
+            Sunset:
+              description: Tanggal penghentian layanan versi v1
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DestinationV1'
+        '400':
+          $ref: '#/components/responses/TidakValid'
+        '401':
+          $ref: '#/components/responses/TidakDikenali'
+
+  /v1/destinations/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        description: Nomor id destinasi
+        schema:
+          type: integer
+          example: 1
+    get:
+      tags: [Destinations]
+      summary: Membaca satu destinasi (versi lama)
+      description: Dilayani sampai 30 Juni 2027. Gunakan /v2/destinations/{id}.
+      deprecated: true
+      responses:
+        '200':
+          description: Data destinasi dengan field region berisi nama daerah
+          headers:
+            Sunset:
+              description: Tanggal penghentian layanan versi v1
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DestinationV1'
+        '401':
+          $ref: '#/components/responses/TidakDikenali'
+        '404':
+          $ref: '#/components/responses/TidakDitemukan'
+    put:
+      tags: [Destinations]
+      summary: Memperbarui data destinasi (versi lama)
+      description: Dilayani sampai 30 Juni 2027. Gunakan /v2/destinations/{id}.
+      deprecated: true
+      security:
+        - ApiKeyAuth: []
+          BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DestinationInputV1'
+      responses:
+        '200':
+          description: Destinasi berhasil diperbarui
+          headers:
+            Sunset:
+              description: Tanggal penghentian layanan versi v1
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DestinationV1'
+        '400':
+          $ref: '#/components/responses/TidakValid'
+        '401':
+          $ref: '#/components/responses/TidakDikenali'
+        '404':
+          $ref: '#/components/responses/TidakDitemukan'
+    delete:
+      tags: [Destinations]
+      summary: Menghapus destinasi (versi lama, hanya admin)
+      description: Dilayani sampai 30 Juni 2027. Gunakan /v2/destinations/{id}.
+      deprecated: true
+      security:
+        - ApiKeyAuth: []
+          BearerAuth: []
+      responses:
+        '204':
+          description: Destinasi berhasil dihapus, tanpa body
+          headers:
+            Sunset:
+              description: Tanggal penghentian layanan versi v1
+              schema:
+                type: string
+        '401':
+          $ref: '#/components/responses/TidakDikenali'
+        '403':
+          $ref: '#/components/responses/TidakBerhak'
+        '404':
+          $ref: '#/components/responses/TidakDitemukan'
+  # ====================================================
 
 components:
   securitySchemes:
@@ -255,7 +389,36 @@ components:
         regionId:
           type: integer
           example: 5
-    # === [TAMBAHAN EKSPERIMEN 1: SCHEMA REGION] ===
+    # === [TAMBAHAN EKSPERIMEN 2: SCHEMA VERSI V1] ===
+    DestinationV1:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        name:
+          type: string
+          example: Danau Poso
+        category:
+          type: string
+          example: danau
+        region:
+          type: string
+          example: Kabupaten Poso
+    DestinationInputV1:
+      type: object
+      required: [name, category, region]
+      properties:
+        name:
+          type: string
+          example: Air Terjun Wera
+        category:
+          type: string
+          example: alam
+        region:
+          type: string
+          example: Kabupaten Sigi
+    # ================================================
     Region:
       type: object
       properties:
@@ -265,7 +428,6 @@ components:
         name:
           type: string
           example: Kota Palu
-    # ==============================================
     LoginRequest:
       type: object
       required: [username, password]
